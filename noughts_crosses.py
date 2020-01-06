@@ -11,6 +11,8 @@ ROWS = 5
 NO_MOVE = COLUMNS * ROWS
 
 MAX_DEPTH = 3
+MAX_SCORE = 2**63 - 1
+MIN_SCORE = -2**63
 
 
 def make_board():
@@ -27,7 +29,7 @@ def minimax(player, evaluate, board, depth):
     new_board = make_board()
 
     if player == 'O':
-        value = -2**32 - 1
+        value = MIN_SCORE
         for move in range(COLUMNS * ROWS):
             if is_legal_move(player, move, board, new_board):
                 val = minimax('X', evaluate, new_board, depth - 1)
@@ -35,7 +37,7 @@ def minimax(player, evaluate, board, depth):
                     value = val
         return value
     else:  # player must be 'X'
-        value = 2**32 - 1
+        value = MAX_SCORE
         for move in range(COLUMNS * ROWS):
             if is_legal_move(player, move, board, new_board):
                 val = minimax('O', evaluate, new_board, depth - 1)
@@ -70,7 +72,7 @@ def one_move(player, evaluate, board):
     new_board = make_board()
 
     if player == 'O':
-        value = -2**32 - 1
+        value = MIN_SCORE
         for i in range(COLUMNS * ROWS):
             if is_legal_move(player, i, board, new_board):
                 val = minimax('X', evaluate, new_board, MAX_DEPTH)
@@ -78,7 +80,7 @@ def one_move(player, evaluate, board):
                     value = val
                     move = i
     else:  # player must be 'X'
-        value = 2**32 - 1
+        value = MAX_SCORE
         for i in range(COLUMNS * ROWS):
             if is_legal_move(player, i, board, new_board):
                 val = minimax('O', evaluate, new_board, MAX_DEPTH)
@@ -112,6 +114,10 @@ def play_game(evaluate1, name1, evaluate2, name2):
     board = make_board()
     moves = 0
 
+    print("%s plays O and %s plays X" % (name1, name2))
+    print("Let's get ready to rumble!!!")
+    print()
+
     while moves < COLUMNS * ROWS:
         one_move('O', evaluate1, board)
         print_board(board)
@@ -131,10 +137,10 @@ def play_game(evaluate1, name1, evaluate2, name2):
 def default_evaluate(board):
     """Return a value that is higher if the board is better for the 'O' player or lower otherwise."""
     if victory('O', board):
-        return 1
+        return MAX_SCORE
 
     if victory('X', board):
-        return -1
+        return MIN_SCORE
 
     return 0
 

@@ -11,6 +11,8 @@ ROWS = 5
 NO_MOVE = COLUMNS * ROWS
 
 MAX_DEPTH = 5
+MAX_SCORE = 2**63 - 1
+MIN_SCORE = -2**63
 
 
 def make_board():
@@ -65,8 +67,8 @@ def is_legal_move(player, pos, board, new_board):
 
 def one_move(player, evaluate, board):
     """Return the move of the given player."""
-    alpha = -2**32 - 1
-    beta = 2**32 - 1
+    alpha = MIN_SCORE
+    beta = MAX_SCORE
     move = NO_MOVE
     new_board = make_board()
 
@@ -108,6 +110,10 @@ def play_game(evaluate1, name1, evaluate2, name2):
     """Play a game of noughts and crosses."""
     board = make_board()
     moves = 0
+
+    print("%s plays O and %s plays X" % (name1, name2))
+    print("Let's get ready to rumble!!!")
+    print()
 
     while moves < COLUMNS * ROWS:
         one_move('O', evaluate1, board)
