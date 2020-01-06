@@ -10,7 +10,7 @@ ROWS = 5
 
 NO_MOVE = COLUMNS * ROWS
 
-MAX_DEPTH = 3
+MAX_DEPTH = 5
 
 
 def make_board():
@@ -18,7 +18,7 @@ def make_board():
     return ['.'] * COLUMNS * ROWS
 
 
-def minimax(player, evaluate, board, depth):
+def minimax(player, evaluate, board, alpha, beta, depth):
     """Return an evaluation of the specified board for the given player."""
     if depth == 0 or victory('O', board) or victory('X', board) or '.' not in board:
         # We have reached the maximum depth or there are no more legal moves.
@@ -26,22 +26,21 @@ def minimax(player, evaluate, board, depth):
 
     new_board = make_board()
 
-    if player == 'O':
-        value = -2**32 - 1
-        for move in range(COLUMNS * ROWS):
-            if is_legal_move(player, move, board, new_board):
-                val = minimax('X', evaluate, new_board, depth - 1)
-                if val > value:
-                    value = val
-        return value
-    else:  # player must be 'X'
-        value = 2**32 - 1
-        for move in range(COLUMNS * ROWS):
-            if is_legal_move(player, move, board, new_board):
-                val = minimax('O', evaluate, new_board, depth - 1)
-                if val < value:
-                    value = val
-        return value
+    for move in range(COLUMNS * ROWS):
+        if is_legal_move(player, move, board, new_board):
+            val = minimax('X' if player == 'O' else 'O', evaluate, new_board, alpha, beta, depth - 1)
+
+            if player == 'O':
+                if val > alpha:
+                    alpha = val
+            else:  # player must be 'X'
+                if val < beta:
+                    beta = val
+
+            if alpha >= beta:
+                return alpha if player == 'O' else beta
+
+    return alpha if player == 'O' else beta
 
 
 def print_board(board):
@@ -66,24 +65,22 @@ def is_legal_move(player, pos, board, new_board):
 
 def one_move(player, evaluate, board):
     """Return the move of the given player."""
+    alpha = -2**32 - 1
+    beta = 2**32 - 1
     move = NO_MOVE
     new_board = make_board()
 
-    if player == 'O':
-        value = -2**32 - 1
-        for i in range(COLUMNS * ROWS):
-            if is_legal_move(player, i, board, new_board):
-                val = minimax('X', evaluate, new_board, MAX_DEPTH)
-                if val > value:
-                    value = val
+    for i in range(COLUMNS * ROWS):
+        if is_legal_move(player, i, board, new_board):
+            val = minimax('X' if player == 'O' else 'O', evaluate, new_board, alpha, beta, MAX_DEPTH)
+
+            if player == 'O':
+                if val > alpha:
+                    alpha = val
                     move = i
-    else:  # player must be 'X'
-        value = 2**32 - 1
-        for i in range(COLUMNS * ROWS):
-            if is_legal_move(player, i, board, new_board):
-                val = minimax('O', evaluate, new_board, MAX_DEPTH)
-                if val < value:
-                    value = val
+            else:  # player must be 'X'
+                if val < beta:
+                    beta = val
                     move = i
 
     if move != NO_MOVE:
