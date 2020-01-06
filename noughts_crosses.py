@@ -66,7 +66,7 @@ def is_legal_move(player, pos, board, new_board):
     return False
 
 
-def one_move(player, evaluate, board):
+def one_move(player, evaluate, board, max_depth):
     """Return the move of the given player."""
     move = NO_MOVE
     new_board = make_board()
@@ -75,7 +75,7 @@ def one_move(player, evaluate, board):
         value = MIN_SCORE
         for i in range(COLUMNS * ROWS):
             if is_legal_move(player, i, board, new_board):
-                val = minimax('X', evaluate, new_board, MAX_DEPTH)
+                val = minimax('X', evaluate, new_board, max_depth)
                 if val > value:
                     value = val
                     move = i
@@ -83,7 +83,7 @@ def one_move(player, evaluate, board):
         value = MAX_SCORE
         for i in range(COLUMNS * ROWS):
             if is_legal_move(player, i, board, new_board):
-                val = minimax('O', evaluate, new_board, MAX_DEPTH)
+                val = minimax('O', evaluate, new_board, max_depth)
                 if val < value:
                     value = val
                     move = i
@@ -109,7 +109,7 @@ def victory(player, board):
     return False
 
 
-def play_game(evaluate1, name1, evaluate2, name2):
+def play_game(evaluate1, name1, max_depth1, evaluate2, name2, max_depth2):
     """Play a game of noughts and crosses."""
     board = make_board()
     moves = 0
@@ -119,12 +119,12 @@ def play_game(evaluate1, name1, evaluate2, name2):
     print()
 
     while moves < COLUMNS * ROWS:
-        one_move('O', evaluate1, board)
+        one_move('O', evaluate1, board, max_depth1)
         print_board(board)
         if victory('O', board):
             return name1
 
-        one_move('X', evaluate2, board)
+        one_move('X', evaluate2, board, max_depth2)
         print_board(board)
         if victory('X', board):
             return name2
@@ -136,13 +136,7 @@ def play_game(evaluate1, name1, evaluate2, name2):
 
 def default_evaluate(board):
     """Return a value that is higher if the board is better for the 'O' player or lower otherwise."""
-    if victory('O', board):
-        return MAX_SCORE
-
-    if victory('X', board):
-        return MIN_SCORE
-
-    return 0
+    return board.count('O') - board.count('X')
 
 
 def main():
@@ -153,18 +147,24 @@ def main():
     if len(sys.argv) == 1:
         name1 = 'Default O'
         evaluate1 = default_evaluate
+        max_depth1 = MAX_DEPTH
     else:
         name1 = sys.argv[1]
-        evaluate1 = importlib.import_module(name1).evaluate
+        mod = importlib.import_module(name1)
+        evaluate1 = mod.evaluate
+        max_depth1 = mod.MAX_DEPTH
 
     if len(sys.argv) == 3:
         name2 = sys.argv[2]
-        evaluate2 = importlib.import_module(name2).evaluate
+        mod = importlib.import_module(name2)
+        evaluate2 = mod.evaluate
+        max_depth2 = mod.MAX_DEPTH
     else:
         name2 = 'Default X'
         evaluate2 = default_evaluate
+        max_depth2 = MAX_DEPTH
 
-    winner = play_game(evaluate1, name1, evaluate2, name2)
+    winner = play_game(evaluate1, name1, max_depth1, evaluate2, name2, max_depth2)
     print("The winner was: %s" % (winner,))
 
 
